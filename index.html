@@ -78,7 +78,22 @@
             }
         }
 
+        async function checkRateLimit() {
+            try {
+                const response = await fetch('https://api.github.com/rate_limit', {
+                    headers: {
+                        'Authorization': `token ${token}`
+                    }
+                });
+                const data = await response.json();
+                console.log('Rate Limit Status:', data);
+            } catch (error) {
+                console.error('Error checking rate limit:', error);
+            }
+        }
+
         fetchFiles();
+        checkRateLimit();
     </script>
 </body>
 </html>
