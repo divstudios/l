@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Text File Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .file-content {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>GitHub Text File Viewer</h1>
+    <div id="file-contents"></div>
+
+    <script>
+        const repoOwner = 'YOUR_GITHUB_USERNAME';
+        const repoName = 'YOUR_REPOSITORY_NAME';
+        const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+
+        async function fetchFiles() {
+            try {
+                const response = await fetch(apiUrl);
+                const files = await response.json();
+
+                const fileContentsDiv = document.getElementById('file-contents');
+
+                for (const file of files) {
+                    if (file.name.endsWith('.txt')) {
+                        const fileResponse = await fetch(file.download_url);
+                        const fileContent = await fileResponse.text();
+
+                        const fileDiv = document.createElement('div');
+                        fileDiv.classList.add('file-content');
+                        fileDiv.innerHTML = `<h2>${file.name}</h2><pre>${fileContent}</pre>`;
+                        fileContentsDiv.appendChild(fileDiv);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching files:', error);
+            }
+        }
+
+        fetchFiles();
+    </script>
+</body>
+</html>
