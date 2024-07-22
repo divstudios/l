@@ -8,12 +8,17 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #f4f4f4;
         }
         .file-content {
             border: 1px solid #ccc;
             padding: 10px;
             margin: 10px 0;
             background-color: #f9f9f9;
+        }
+        .error-message {
+            color: red;
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -22,20 +27,43 @@
     <div id="file-contents"></div>
 
     <script>
-const repoOwner = 'divstudios';
-const repoName = 'l';
-const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+        const repoOwner = 'divstudios';
+        const repoName = 'l';
+        const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+        const base64Token = 'Z2hwX21vSXF5dTdFajI3RXJvV2lNbk84WGszWGdMVExpczJEQkVDQw==';
+
+        // Decode Base64 token
+        function decodeBase64(base64) {
+            return atob(base64);
+        }
+
+        const token = decodeBase64(base64Token);
 
         async function fetchFiles() {
             try {
-                const response = await fetch(apiUrl);
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `token ${token}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
                 const files = await response.json();
 
                 const fileContentsDiv = document.getElementById('file-contents');
+                fileContentsDiv.innerHTML = ''; // Clear previous contents
 
                 for (const file of files) {
                     if (file.name.endsWith('.txt')) {
-                        const fileResponse = await fetch(file.download_url);
+                        const fileResponse = await fetch(file.download_url, {
+                            headers: {
+                                'Authorization': `token ${token}`
+                            }
+                        });
+                        if (!fileResponse.ok) {
+                            throw new Error(`Failed to fetch file: ${file.name}`);
+                        }
                         const fileContent = await fileResponse.text();
 
                         const fileDiv = document.createElement('div');
@@ -46,6 +74,11 @@ const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
                 }
             } catch (error) {
                 console.error('Error fetching files:', error);
+                const fileContentsDiv = document.getElementById('file-contents');
+                const errorDiv = document.createElement('div');
+                errorDiv.classList.add('error-message');
+                errorDiv.textContent = `Error fetching files: ${error.message}`;
+                fileContentsDiv.appendChild(errorDiv);
             }
         }
 
