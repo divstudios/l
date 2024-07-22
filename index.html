@@ -38,55 +38,55 @@
         console.log('API URL:', apiUrl);
         console.log('Token:', token);
 
-        async function fetchFiles() {
-            try {
-                console.log('Fetching files from API...');
-                const response = await fetch(apiUrl, {
+ async function fetchFiles() {
+    try {
+        console.log('Fetching files from API...');
+        const response = await fetch(apiUrl, {
+            headers: {
+                'Authorization': `token ${token}`
+            }
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const files = await response.json();
+        console.log('Files retrieved:', files);
+
+        const fileContentsDiv = document.getElementById('file-contents');
+        fileContentsDiv.innerHTML = '';
+
+        for (const file of files) {
+            console.log('Processing file:', file.name);
+            if (file.name.endsWith('.txt')) {
+                const fileContentResponse = await fetch(file.download_url, {
                     headers: {
                         'Authorization': `token ${token}`
                     }
                 });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                if (!fileContentResponse.ok) {
+                    throw new Error(`Failed to fetch file: ${file.name}`);
                 }
-                const files = await response.json();
-                console.log('Files retrieved:', files);
+                const fileContent = await fileContentResponse.text();
+                console.log(`Content of ${file.name}:`, fileContent);
 
-                const fileContentsDiv = document.getElementById('file-contents');
-                fileContentsDiv.innerHTML = '';
-
-                for (const file of files) {
-                    console.log('Processing file:', file.name);
-                    if (file.name.endsWith('.txt')) {
-                        const fileContentResponse = await fetch(file.download_url, {
-                            headers: {
-                                'Authorization': `token ${token}`
-                            }
-                        });
-                        if (!fileContentResponse.ok) {
-                            throw new Error(`Failed to fetch file: ${file.name}`);
-                        }
-                        const fileContent = await fileContentResponse.text();
-                        console.log(`Content of ${file.name}:`, fileContent);
-
-                        const fileDiv = document.createElement('div');
-                        fileDiv.classList.add('file-content');
-                        fileDiv.innerHTML = `<h2>${file.name}</h2><pre>${fileContent}</pre>`;
-                        fileContentsDiv.appendChild(fileDiv);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching files:', error);
-                const fileContentsDiv = document.getElementById('file-contents');
-                const errorDiv = document.createElement('div');
-                errorDiv.classList.add('error-message');
-                errorDiv.textContent = `Error fetching files: ${error.message}`;
-                fileContentsDiv.appendChild(errorDiv);
+                const fileDiv = document.createElement('div');
+                fileDiv.classList.add('file-content');
+                fileDiv.innerHTML = `<h2>${file.name}</h2><pre>${fileContent}</pre>`;
+                fileContentsDiv.appendChild(fileDiv);
             }
         }
+    } catch (error) {
+        console.error('Error fetching files:', error);
+        const fileContentsDiv = document.getElementById('file-contents');
+        const errorDiv = document.createElement('div');
+        errorDiv.classList.add('error-message');
+        errorDiv.textContent = `Error fetching files: ${error.message}`;
+        fileContentsDiv.appendChild(errorDiv);
+    }
+}
 
-        // Call fetchFiles to load the data when the page is loaded
-        fetchFiles();
+fetchFiles();
+
     </script>
 </body>
 </html>
