@@ -30,6 +30,7 @@
         const repoOwner = 'divstudios';
         const repoName = 'l';
         const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+
         const Part1 = 'ghp_moIyu7Ejz27Ero';
         const Part2 = 'WiMnO4Xk3XgLTLis2DBZCC';
         const token = Part1 + Part2;
@@ -59,24 +60,25 @@
             fileContentsDiv.innerHTML = ''; // Clear previous contents
 
             files.forEach(async (file) => {
-                if (file.name.endsWith('.txt')) {
+                if (file.type === 'file' && file.name.endsWith('.txt')) {
                     try {
-                        const fileResponse = await fetch(file.download_url, {
+                        // Fetch file content using the GitHub API
+                        const fileContentResponse = await fetch(file.download_url, {
                             headers: {
                                 'Authorization': `token ${token}`
                             }
                         });
-                        if (!fileResponse.ok) {
-                            throw new Error(`Failed to fetch file: ${file.name}`);
+                        if (!fileContentResponse.ok) {
+                            throw new Error(`Failed to fetch file content: ${file.name}`);
                         }
-                        const fileContent = await fileResponse.text();
+                        const fileContent = await fileContentResponse.text();
 
                         const fileDiv = document.createElement('div');
                         fileDiv.classList.add('file-content');
                         fileDiv.innerHTML = `<h2>${file.name}</h2><pre>${fileContent}</pre>`;
                         fileContentsDiv.appendChild(fileDiv);
                     } catch (error) {
-                        console.error('Error fetching file:', error);
+                        console.error('Error fetching file content:', error);
                     }
                 }
             });
