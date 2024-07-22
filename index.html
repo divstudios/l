@@ -35,8 +35,6 @@
         const Part2 = 'WiMnO4Xk3XgLTLis2DBZCC';
         const token = Part1 + Part2;
 
-const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
-
 async function fetchFiles() {
     try {
         const response = await fetch(apiUrl, {
