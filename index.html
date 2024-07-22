@@ -16,16 +16,9 @@
             margin: 10px 0;
             background-color: #f9f9f9;
         }
-        .file-content pre {
-            white-space: pre-wrap; /* Ensure that text wraps correctly */
-            overflow: auto; /* Add scroll if the content overflows */
-        }
         .error-message {
             color: red;
             margin: 20px 0;
-        }
-        h2 {
-            margin-top: 0;
         }
     </style>
 </head>
@@ -42,67 +35,49 @@
         const Part2 = 'WiMnO4Xk3XgLTLis2DBZCC';
         const token = Part1 + Part2;
 
-        async function fetchFiles() {
-            console.log('Fetching files from GitHub...');
-            try {
-                const response = await fetch(apiUrl, {
+async function fetchFiles() {
+    try {
+        const response = await fetch(apiUrl, {
+            headers: {
+                'Authorization': `token ${token}`
+            }
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const files = await response.json();
+
+        const fileContentsDiv = document.getElementById('file-contents');
+        fileContentsDiv.innerHTML = '';
+
+        for (const file of files) {
+            if (file.name.endsWith('.txt')) {
+                const fileContentResponse = await fetch(file.download_url, {
                     headers: {
                         'Authorization': `token ${token}`
                     }
                 });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                if (!fileContentResponse.ok) {
+                    throw new Error(`Failed to fetch file: ${file.name}`);
                 }
-                const files = await response.json();
-                console.log('Files fetched successfully:', files);
+                const fileContent = await fileContentResponse.text();
 
-                const fileContentsDiv = document.getElementById('file-contents');
-                fileContentsDiv.innerHTML = '';
-
-                let hasTextFiles = false;
-
-                for (const file of files) {
-                    if (file.name.endsWith('.txt')) {
-                        hasTextFiles = true;
-                        console.log(`Fetching content of file: ${file.name}`);
-                        const fileContentResponse = await fetch(file.download_url, {
-                            headers: {
-                                'Authorization': `token ${token}`
-                            }
-                        });
-                        if (!fileContentResponse.ok) {
-                            throw new Error(`Failed to fetch file: ${file.name}`);
-                        }
-                        const fileContent = await fileContentResponse.text();
-
-                        console.log(`File content fetched successfully for: ${file.name}`);
-
-                        const fileDiv = document.createElement('div');
-                        fileDiv.classList.add('file-content');
-                        fileDiv.innerHTML = `<h2>${file.name}</h2><pre>${fileContent}</pre>`;
-                        fileContentsDiv.appendChild(fileDiv);
-                    }
-                }
-
-                if (!hasTextFiles) {
-                    console.log('No .txt files found in the repository.');
-                    const noFilesDiv = document.createElement('div');
-                    noFilesDiv.classList.add('file-content');
-                    noFilesDiv.textContent = 'No .txt files found in this repository.';
-                    fileContentsDiv.appendChild(noFilesDiv);
-                }
-
-            } catch (error) {
-                console.error('Error fetching files:', error);
-                const fileContentsDiv = document.getElementById('file-contents');
-                const errorDiv = document.createElement('div');
-                errorDiv.classList.add('error-message');
-                errorDiv.textContent = `Error fetching files: ${error.message}`;
-                fileContentsDiv.appendChild(errorDiv);
+                const fileDiv = document.createElement('div');
+                fileDiv.classList.add('file-content');
+                fileDiv.innerHTML = `<h2>${file.name}</h2><pre>${fileContent}</pre>`;
+                fileContentsDiv.appendChild(fileDiv);
             }
         }
+    } catch (error) {
+        console.error('Error fetching files:', error);
+        const fileContentsDiv = document.getElementById('file-contents');
+        const errorDiv = document.createElement('div');
+        errorDiv.classList.add('error-message');
+        errorDiv.textContent = `Error fetching files: ${error.message}`;
+        fileContentsDiv.appendChild(errorDiv);
+    }
+}
 
-        fetchFiles();
     </script>
 </body>
 </html>
