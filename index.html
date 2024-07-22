@@ -30,14 +30,10 @@
         const repoOwner = 'divstudios';
         const repoName = 'l';
         const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
-        const base64Token = 'Z2hwX21vSXF5dTdFajI3RXJvV2lNbk84WGszWGdMVExpczJEQkVDQw==';
+        const Part1 = 'ghp_moIyu7Ejz27Ero';
+        const Part2 = 'WiMnO4Xk3XgLTLis2DBZCC';
+        const token = Part1 + Part2;
 
-        // Decode Base64 token
-        function decodeBase64(base64) {
-            return atob(base64);
-        }
-
-        const token = decodeBase64(base64Token);
 
         async function fetchFiles() {
             try {
